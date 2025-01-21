@@ -2,7 +2,7 @@ import csv
 
 import pandas as pd
 
-from geolocator import get_coordinates
+from geolocator import get_coordinates, calc_distance
 
 
 def load_data(file_path: str) -> pd.DataFrame:
@@ -28,6 +28,9 @@ def load_data(file_path: str) -> pd.DataFrame:
 
     df = pd.DataFrame(clean_data[1:], columns=columns)
 
+    rating_columns = [col for col in df.columns if 'Rating' in col]
+    df[rating_columns] = df[rating_columns].replace(-1, 1)
+
     # Get coords based on location
     print("Coords gatchering...")
     unique_locations = df['Location'].unique()
@@ -38,6 +41,10 @@ def load_data(file_path: str) -> pd.DataFrame:
 
     df['Latitude'] = df['Location'].map(lambda loc: location_coords[loc][0])
     df['Longitude'] = df['Location'].map(lambda loc: location_coords[loc][1])
+
+    df = df.dropna(subset=['Latitude', 'Longitude'])
+
+    df['Distance'] = df.apply(calc_distance, axis=1)
 
     print('Dataframe:\n', df.head())
     print('\nDataframe length:', len(df))
