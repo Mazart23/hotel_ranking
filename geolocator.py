@@ -1,5 +1,3 @@
-import pandas as pd
-
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 from geopy.distance import geodesic

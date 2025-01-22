@@ -28,8 +28,15 @@ def load_data(file_path: str) -> pd.DataFrame:
 
     df = pd.DataFrame(clean_data[1:], columns=columns)
 
+    df = df[df['Location'] != 'Unknown']
+
+    cols = df.columns.tolist()
+    price_idx, location_idx = cols.index("Price"), cols.index("Location")
+    cols[price_idx], cols[location_idx] = cols[location_idx], cols[price_idx]
+    df = df[cols]
+
     rating_columns = [col for col in df.columns if 'Rating' in col]
-    df[rating_columns] = df[rating_columns].replace(-1, 1)
+    df[rating_columns] = df[rating_columns].astype(int).replace(-1, 1)
 
     # Get coords based on location
     print("Coords gatchering...")
@@ -44,7 +51,9 @@ def load_data(file_path: str) -> pd.DataFrame:
 
     df = df.dropna(subset=['Latitude', 'Longitude'])
 
-    df['Distance'] = df.apply(calc_distance, axis=1)
+    df['Distance_From_Kraków'] = df.apply(calc_distance, axis=1)
+
+    df = df.drop(columns=['Latitude', 'Longitude', 'Username'])
 
     print('Dataframe:\n', df.head())
     print('\nDataframe length:', len(df))
