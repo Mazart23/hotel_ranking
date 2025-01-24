@@ -38,6 +38,10 @@ def load_data(file_path: str) -> pd.DataFrame:
     rating_columns = [col for col in df.columns if 'Rating' in col]
     df[rating_columns] = df[rating_columns].astype(int).replace(-1, 1)
 
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')  # Convert to numeric, set invalid to NaN
+    df = df.dropna(subset=['Price'])  # Drop rows with invalid prices
+    df['Price'] = df['Price'].astype(int)  # Convert back to integer
+
     # Get coords based on location
     print("Coords gatchering...")
     unique_locations = df['Location'].unique()
@@ -59,4 +63,36 @@ def load_data(file_path: str) -> pd.DataFrame:
     print('\nDataframe length:', len(df))
     print('\nDataframe describe:\n', df.describe())
     
-    return df
+    output_file = "cleaned_data.csv"
+    df.to_csv(output_file, index=False)
+
+      # Aggregation for each hotel
+    print("Aggregating data...")
+    aggregated_df = df.groupby('Hotel_ID').agg({
+        'Location': 'first',
+        'Price': 'mean',
+        'Overall_Rating': 'mean',
+        'Value_Rating': 'mean',
+        'Rooms_Rating': 'mean',
+        'Location_Rating': 'mean',
+        'Cleanliness_Rating': 'mean',
+        'Front_Desk_Rating': 'mean',
+        'Service_Rating': 'mean',
+        'Business_Service_Rating': 'mean',
+        'Distance_From_Kraków': 'first'
+    }).reset_index()
+
+    # Add the Number_Of_Opinions column
+    aggregated_df['Number_Of_Opinions'] = df.groupby('Hotel_ID').size().values
+
+    # Round numerical columns to 2 decimal places where applicable
+    ratings_columns = [col for col in aggregated_df.columns if 'Rating' in col or col == 'Price']
+    aggregated_df[ratings_columns] = aggregated_df[ratings_columns].round(2)
+
+    print('Aggregated Dataframe:\n', aggregated_df.head())
+    print('\nAggregated Dataframe length:', len(aggregated_df))
+    
+    output_file = "cleaned_aggregated_data.csv"
+    aggregated_df.to_csv(output_file, index=False)
+
+    return aggregated_df
