@@ -37,16 +37,10 @@ result_headings = [
     "Score"
 ]
 
-weights_layout = [
-    [sg.Text('Podaj wagi (1 - 9)', justification='center')],
-    [sg.InputText(key=f'-WEIGHT{str(i)}-', size=(20, 1), default_text='  1') for i in range(len(list_k[2:]))],
-    [sg.Text('')]
-]
-
 criteria_layout = [
     [sg.Text('Podaj kryteria (min/max)', justification='center')],
-    [sg.Text(i, size=(20, 1)) for i in list_k[2:]],
-    [sg.Combo(values=['min', 'max'], default_value='min', key=f'-CRIT{str(i)}-', size=(20, 1)) for i in range(len(list_k[2:]))],
+    [sg.Text(i, size=(16, 1)) for i in list_k[2:]],
+    [sg.Combo(values=['min', 'max'], default_value='min', key=f'-CRIT{str(i)}-', size=(16, 1)) for i in range(len(list_k[2:]))],
     [sg.Text('')]
 ]
 
@@ -82,7 +76,6 @@ disp_comparision_layout = [
 
 layout = [
     [criteria_layout],
-    [weights_layout],
     [choose_algo_layout],
     [create_rank_layout],
     [sg.Col(alternatives_layout,vertical_alignment='top')],
@@ -103,26 +96,15 @@ window = sg.Window(
 
 def read_additional_params() -> dict:
     
-    weights = np.array([str.lstrip(values[f'-WEIGHT{i}-']) for i in range(len(list_k[2:]))])
     criteria = np.array([values[f'-CRIT{i}-'] for i in range(len(list_k[2:]))])
-
-    regex = "^[+-]?([1-9])?$"
-    
-    if validate(weights, regex):
         
-        weights = [int(i) for i in weights]
-        additional_params = {
-                    'FUZZY_TOPSIS': (weights, criteria), #checked
-                    'RSM': criteria, #checked
-                    'SAFETY_PRINCIPAL': None, #checked
-                    'UTA': criteria #checked
-                }
-        
-        return additional_params, weights, criteria
+    additional_params = {
+        'RSM': criteria,
+        'SAFETY_PRINCIPAL': None,
+        'UTA': criteria
+    }
     
-    else:
-        sg.popup('Wprowadzone dane są niepoprawne\nSpróbuj ponownie')
-        return None, None, None
+    return additional_params, criteria
 
 
 while True:
@@ -135,7 +117,7 @@ while True:
     # Obliczenie rankingu pojedyńczą metodą
     if event == '-BUTTON_RANKING-':
         
-        additional_params, weights, criteria = read_additional_params()
+        additional_params, criteria = read_additional_params()
         
         if additional_params is not None:
             # Load database
@@ -151,7 +133,7 @@ while True:
     # Porównanie rankingów
     if event == '-COMPARE_RANKING-':
         
-        additional_params, weights, criteria = read_additional_params()
+        additional_params, criteria = read_additional_params()
           
         if additional_params is not None:  
             db = load_data("./datasets/reviews.dat")
