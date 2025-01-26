@@ -62,12 +62,20 @@ choose_country_layout = [
 criteria_layout = [
     [sg.Text('Podaj kryteria (min/max)', justification='center')],
     *[
-        [sg.Text(criterion, size=(20, 1)), 
-         sg.Combo(values=['min', 'max'], default_value='min', key=f'-CRIT{index}-', size=(16, 1))]
-        for index, criterion in enumerate(list_k[2:])
-    ],
+        [
+            sg.Text(list_k[2 + 2 * i], size=(20, 1)), 
+            sg.Combo(values=['min', 'max'], default_value='min', key=f'-CRIT{2 * i}-', size=(16, 1)),
+            sg.Text(list_k[3 + 2 * i], size=(20, 1)), 
+            sg.Combo(values=['min', 'max'], default_value='min', key=f'-CRIT{2 * i + 1}-', size=(16, 1))
+        ]
+        for i in range(len(list_k[2:]) // 2)
+    ] + (
+        [[sg.Text(list_k[-1], size=(20, 1)), sg.Combo(values=['min', 'max'], default_value='min', key=f'-CRIT{len(list_k[2:]) - 1}-', size=(16, 1))]]
+        if len(list_k[2:]) % 2 != 0 else []
+    ),
     [sg.Text('')]
 ]
+
 
 choose_algo_layout = [
     [sg.Text('Wybierz algorytm'), sg.Combo(key='-ALGO-', values=list(algos.keys()), default_value=list(algos.keys())[0], size=(50, 5))],
@@ -115,7 +123,7 @@ window = sg.Window(
     layout,
     finalize=True,
     resizable=True,
-    size=(1000, 1000),
+    size=(1000, 800),
     element_justification='center'
 )
 
