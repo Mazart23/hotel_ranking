@@ -1,19 +1,21 @@
 import PySimpleGUI as sg
 import numpy as np
+import pandas as pd
 
 from RSM.RSM import RSM
 from spcs.spcs import gui_spcs
 from UTA.main import uta
 from input_validation import validate
 from ranking_comparision.compare import Spearman_s_Footrule
-import pandas as pd
 
+# Algorithm mapping
 algos = {
     'RSM': RSM,
     'SAFETY_PRINCIPAL': gui_spcs,
     'UTA': uta
 }
 
+# List of criteria
 list_k = [
     "Hotel_ID", 
     "Location", 
@@ -34,6 +36,28 @@ result_headings = [
     "Hotel_ID",
     "Location",
     "Score"
+]
+
+# Country options (translated to Polish)
+countries = {
+    "Wszystkie": "cleaned_aggregated_data.csv",
+    "Australia": "./split_by_country/Australia.csv",
+    "Kanada": "./split_by_country/Canada.csv",
+    "Chiny": "./split_by_country/China.csv",
+    "Dominikana": "./split_by_country/Dominican_Republic.csv",
+    "Anglia": "./split_by_country/England.csv",
+    "Francja": "./split_by_country/France.csv",
+    "Niemcy": "./split_by_country/Germany.csv",
+    "Indonezja": "./split_by_country/Indonesia.csv",
+    "Włochy": "./split_by_country/Italy.csv",
+    "Holandia": "./split_by_country/Netherlands.csv",
+    "Portoryko": "./split_by_country/Puerto_Rico.csv",
+    "Singapur": "./split_by_country/Singapore.csv",
+    "Hiszpania": "./split_by_country/Spain.csv",
+    "USA": "./split_by_country/USA.csv"
+}
+choose_country_layout = [
+    [sg.Text('Wybierz kraj'), sg.Combo(key='-COUNTRY-', values=list(countries.keys()), default_value='Wszystkie', size=(50, 5))]
 ]
 
 criteria_layout = [
@@ -77,6 +101,7 @@ disp_comparision_layout = [
 ]
 
 layout = [
+    [choose_country_layout],
     [criteria_layout],
     [choose_algo_layout],
     [create_rank_layout],
@@ -95,7 +120,6 @@ window = sg.Window(
     element_justification='center'
 )
 
-
 def read_additional_params() -> dict:
     criteria = np.array([values[f'-CRIT{i}-'] for i in range(len(list_k[2:]))])
     
@@ -107,20 +131,22 @@ def read_additional_params() -> dict:
     
     return additional_params, criteria
 
-
 while True:
     event, values = window.read(timeout=200)
     
     if event == sg.WIN_CLOSED:
         break
     
-    # Obliczenie rankingu pojedynczą metodą
+    # Generate ranking using a single method
     if event == '-BUTTON_RANKING-':
         additional_params, criteria = read_additional_params()
         
         if additional_params is not None:
-            # Load database
-            db = pd.read_csv('cleaned_aggregated_data.csv')
+            # Load the appropriate database based on country selection
+            selected_country = values['-COUNTRY-']
+            csv_file = countries[selected_country]
+            db = pd.read_csv(csv_file)
+            
             window['-TABLE_KRYT-'].update(values=list(map(tuple, db.values)))
             
             # Call algorithm if not called before
@@ -128,13 +154,15 @@ while True:
                 db = algos[values['-ALGO-']](db, additional_params[values['-ALGO-']])
 
             window['-TABLE_RANK-'].update(values=list(map(tuple, db.sort_values(by=[f"{values['-ALGO-']}_score"], ascending=False)[result_headings[:-1] + [f"{values['-ALGO-']}_score"]].values)))
-            
-    # Porównanie rankingów
+    
+    # Compare rankings
     if event == '-COMPARE_RANKING-':
         additional_params, criteria = read_additional_params()
         
         if additional_params is not None:
-            db = pd.read_csv('cleaned_aggregated_data.csv')
+            selected_country = values['-COUNTRY-']
+            csv_file = countries[selected_country]
+            db = pd.read_csv(csv_file)
             window['-TABLE_KRYT-'].update(values=list(map(tuple, db.values)))
             
             if f"{values['-ALGO1-']}_score" not in db.columns:
