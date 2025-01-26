@@ -101,7 +101,7 @@ def read_additional_params() -> dict:
     
     additional_params = {
         'RSM': criteria,
-        'SAFETY_PRINCIPAL': None,
+        'SAFETY_PRINCIPAL':  {"criteria": ["Price", "Overall_Rating", "Value_Rating"]},
         'UTA': criteria
     }
     
