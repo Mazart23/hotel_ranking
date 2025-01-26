@@ -5,7 +5,6 @@ import pandas as pd
 from RSM.RSM import RSM
 from spcs.spcs import gui_spcs
 from UTA.main import uta
-from input_validation import validate
 from ranking_comparision.compare import Spearman_s_Footrule
 
 # Algorithm mapping
