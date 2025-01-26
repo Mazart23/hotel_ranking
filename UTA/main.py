@@ -9,7 +9,7 @@ def uta(df, max_or_min):
     criteria = df[["Price", "Overall_Rating", "Value_Rating", 
                     "Rooms_Rating", "Location_Rating", 
                     "Cleanliness_Rating", "Front_Desk_Rating", 
-                    "Service_Rating", "Business_Service_Rating", "Number_Of_Opinions"]]
+                    "Service_Rating", "Business_Service_Rating", "Distance_From_Kraków", "Number_Of_Opinions"]]
     
     # Rename columns to shorter names for convenience
     criteria.rename(columns={
@@ -22,13 +22,14 @@ def uta(df, max_or_min):
         "Front_Desk_Rating": "FR", 
         "Service_Rating": "SR", 
         "Business_Service_Rating": "BSR",
+        "Distance_From_Kraków": "DFK",
         "Number_Of_Opinions": "NO"
     }, inplace=True)
 
     # Prepare points as a NumPy array
     points = []
     for _, row in criteria.iterrows():
-        points.append([row.Price, row.OR, row.VR, row.RR, row.LR, row.CR, row.FR, row.SR, row.BSR, row.NO])
+        points.append([row.Price, row.OR, row.VR, row.RR, row.LR, row.CR, row.FR, row.SR, row.BSR, row.DFK, row.NO])
     points = np.array(points)
 
     # Get min and max for normalization
@@ -48,6 +49,7 @@ def uta(df, max_or_min):
         [0.2, 0.16, 0.12, 0.08, 0],  # Front Desk Rating
         [0.2, 0.16, 0.12, 0.08, 0],  # Service Rating
         [0.2, 0.16, 0.12, 0.08, 0],  # Business Service Rating
+        [0.2, 0.02, 0],
         [0.2, 0.02, 0]
     ]
 
