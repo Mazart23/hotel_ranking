@@ -6,7 +6,7 @@ from spcs.spcs import gui_spcs
 from UTA.main import uta
 from input_validation import validate
 from ranking_comparision.compare import Spearman_s_Footrule
-from loader import load_data
+import pandas as pd
 
 algos = {
     'RSM': RSM,
@@ -120,7 +120,7 @@ while True:
         
         if additional_params is not None:
             # Load database
-            db = load_data("./datasets/reviews.dat")
+            db = pd.read_csv('cleaned_aggregated_data.csv')
             window['-TABLE_KRYT-'].update(values=list(map(tuple, db.values)))
             
             # Call algorithm if not called before
@@ -134,7 +134,7 @@ while True:
         additional_params, criteria = read_additional_params()
         
         if additional_params is not None:
-            db = load_data("./datasets/reviews.dat")
+            db = pd.read_csv('cleaned_aggregated_data.csv')
             window['-TABLE_KRYT-'].update(values=list(map(tuple, db.values)))
             
             if f"{values['-ALGO1-']}_score" not in db.columns:

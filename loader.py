@@ -96,3 +96,5 @@ def load_data(file_path: str) -> pd.DataFrame:
     aggregated_df.to_csv(output_file, index=False)
 
     return aggregated_df
+
+db = load_data("./datasets/reviews.dat")
