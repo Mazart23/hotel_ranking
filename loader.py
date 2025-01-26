@@ -2,8 +2,49 @@ import csv
 
 import pandas as pd
 
+import os
+
 from geolocator import get_coordinates, calc_distance
 
+city_to_country = {
+    "New York": "USA",
+    "Paris": "France",
+    "Seattle": "USA",
+    "Berlin": "Germany",
+    "Madrid": "Spain",
+    "Francisco": "USA",
+    "Louisiana": "USA",
+    "Singapore": "Singapore",
+    "Bali": "Indonesia",
+    "London": "England",
+    "Boston": "USA",
+    "Venice": "Italy",
+    "Rome": "Italy",
+    "Toronto": "Canada",
+    "Beijing": "China",
+    "Los Angeles": "USA",
+    "Miami": "USA",
+    "Dallas": "USA",
+    "Austin": "USA",
+    "Orlando": "USA",
+    "Honolulu": "USA",
+    "Phoenix": "USA",
+    "Amsterdam": "Netherlands",
+    "Frankfurt": "Germany",
+    "Barcelona": "Spain",
+    "Florence": "Italy",
+    "Kong": "China",
+    "Sydney": "Australia",
+    "Dominican": "Dominican_Republic",
+    "Rico": "Puerto_Rico"
+}
+
+def map_to_country(location):
+
+    for city, country in city_to_country.items():
+        if city in location:
+            return country
+    return "Unknown"
 
 def load_data(file_path: str) -> pd.DataFrame:
 
@@ -94,6 +135,18 @@ def load_data(file_path: str) -> pd.DataFrame:
     
     output_file = "cleaned_aggregated_data.csv"
     aggregated_df.to_csv(output_file, index=False)
+
+    aggregated_df['Country'] = aggregated_df['Location'].apply(map_to_country)
+
+    # Split data by country and save to files
+    print("Splitting data by country...")
+    output_dir = "split_by_country"
+    os.makedirs(output_dir, exist_ok=True)
+    for country in aggregated_df['Country'].unique():
+        country_data = aggregated_df[aggregated_df['Country'] == country]
+        country_file = f"{output_dir}/{country.replace(' ', '_')}.csv"
+        country_data.to_csv(country_file, index=False)
+        print(f"Saved data for {country} to {country_file}")
 
     return aggregated_df
 
